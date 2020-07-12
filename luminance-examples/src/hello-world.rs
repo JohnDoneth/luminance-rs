@@ -12,7 +12,7 @@ use glfw::{Action, Context as _, Key, WindowEvent};
 use luminance::context::GraphicsContext as _;
 use luminance::pipeline::PipelineState;
 use luminance::render_state::RenderState;
-use luminance::{scissor_region::ScissorRegion, tess::Mode};
+use luminance::tess::Mode;
 use luminance_derive::{Semantics, Vertex};
 use luminance_glfw::GlfwSurface;
 use luminance_windowing::{WindowDim, WindowOpt};
@@ -243,28 +243,18 @@ fn main() {
         // Start shading with our program.
         shd_gate.shade(&mut program, |_, _, mut rdr_gate| {
           // Start rendering things with the default render state provided by luminance.
-          rdr_gate.render(
-            &RenderState::default().set_scissor_region(ScissorRegion {
-              x: 0,
-              y: 0,
-              width: 500,
-              height: 1000,
-            }),
-            |mut tess_gate| {
-              // Pick the right tessellation to use depending on the mode chosen and render it to the
-              // surface.
-              match demo {
-                TessMethod::Direct => tess_gate.render(&direct_triangles),
-                TessMethod::Indexed => tess_gate.render(&indexed_triangles),
-                TessMethod::DirectDeinterleaved => {
-                  tess_gate.render(&direct_deinterleaved_triangles)
-                }
-                TessMethod::IndexedDeinterleaved => {
-                  tess_gate.render(&indexed_deinterleaved_triangles)
-                }
+          rdr_gate.render(&RenderState::default(), |mut tess_gate| {
+            // Pick the right tessellation to use depending on the mode chosen and render it to the
+            // surface.
+            match demo {
+              TessMethod::Direct => tess_gate.render(&direct_triangles),
+              TessMethod::Indexed => tess_gate.render(&indexed_triangles),
+              TessMethod::DirectDeinterleaved => tess_gate.render(&direct_deinterleaved_triangles),
+              TessMethod::IndexedDeinterleaved => {
+                tess_gate.render(&indexed_deinterleaved_triangles)
               }
-            },
-          );
+            }
+          });
         });
       },
     );
